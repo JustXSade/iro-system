@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController; // Add this line
 // Dashboard Page - Now routes through the Controller
 Route::get('/', [DashboardController::class, 'index']);
 
+Route::post('/store-entry', [DashboardController::class, 'store']);
 
 // Keep the other routes as they were for now
 Route::get('/directory', function () {

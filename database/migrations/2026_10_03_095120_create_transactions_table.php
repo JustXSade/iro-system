@@ -10,17 +10,12 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-
-            // Foreign Key එක (Players table එකට link කරනවා)
-            // onDelete('cascade') දැම්මම, player ව delete කරොත් එයාගේ transactions ඔක්කොම auto delete වෙනවා.
-            $table->foreignId('player_id')->constrained('players')->onDelete('cascade')->onUpdate('cascade');
-
-            $table->integer('box_number'); // කොටු අංකය (1 - 100)
-            $table->integer('quantity'); // කොළ කීයක් ගත්තද
-            $table->decimal('total_amount', 10, 2); // ගෙවන්න ඕන මුළු ගාණ
-            $table->string('payment_status')->default('Pending'); // Paid, Pending, Not Paid
-            $table->date('game_date'); // රෑ 8ට මාරු වෙන දවස track කරන්න
-
+            $table->date('game_date')->index(); // Indexed for fast daily querying
+            $table->string('player_name');
+            $table->integer('box_number');
+            $table->integer('quantity');
+            $table->decimal('total_amount', 10, 2);
+            $table->enum('payment_status', ['Paid', 'Pending', 'Not Paid']);
             $table->timestamps();
         });
     }
