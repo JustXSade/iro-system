@@ -1,23 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController; // Add this line
 
-// 1. Dashboard Page (Base URL)
-Route::get('/', function () {
-    return view('dashboard');
-});
+// Dashboard Page - Now routes through the Controller
+Route::get('/', [DashboardController::class, 'index']);
 
-// 2. Directory Page (Players / Naya list)
+
+// Keep the other routes as they were for now
 Route::get('/directory', function () {
     return view('directory');
 });
 
-// 3. History Page (Past records)
 Route::get('/history', function () {
     return view('history');
 });
 
-// 4. Profile Page (Settings/Logout)
 Route::get('/profile', function () {
     return view('profile');
 });
