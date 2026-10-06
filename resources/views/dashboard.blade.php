@@ -1,21 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-
     <!-- Success & Error Alerts -->
-    @if(session('success'))
-        <div id="toast-alert" class="fixed top-8 right-8 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    @if (session('success'))
+        <div id="toast-alert"
+            class="fixed top-8 right-8 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span class="text-lg font-semibold">{{ session('success') }}</span>
         </div>
     @endif
 
-    @if($errors->any())
-        <div id="toast-alert-error" class="fixed top-8 right-8 bg-rose-500 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    @if ($errors->any())
+        <div id="toast-alert-error"
+            class="fixed top-8 right-8 bg-rose-500 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <span class="text-lg font-semibold">{{ $errors->first() }}</span>
         </div>
@@ -130,7 +135,7 @@
 
             <!-- Left: Quick Entry Form (1/3 Width) -->
             <div class="col-span-1 bg-white p-10 rounded-3xl border border-purple-100 shadow-sm min-h-[500px]">
-                <h2 class="text-3xl font-bold text-slate-800 mb-8">Add New Entry</h2>
+                <h2 class="text-3xl font-bold text-slate-800 mb-8 bg-green-100 px-6 py-4 rounded-2xl">Add New Entry</h2>
 
                 <!-- Entry Form -->
                 <form action="{{ url('/store-entry') }}" method="POST" id="quickEntryForm">
@@ -177,35 +182,34 @@
                         Add Another Box
                     </button>
 
-                    <!-- Payment Status -->
-                    <div class="mb-8">
-                        <label class="block text-lg font-semibold text-slate-700 mb-3">Payment Status</label>
-                        <div class="grid grid-cols-3 gap-4">
+                    <!-- Payment Section (Total Bill & Cash Paid Group) -->
+                    <div class="mb-8 bg-slate-50 p-6 rounded-3xl border border-slate-200 shadow-inner">
 
-                            <label class="cursor-pointer">
-                                <input type="radio" name="payment_status" value="Paid" class="peer sr-only" checked>
-                                <div
-                                    class="w-full py-4 text-center text-xl font-bold rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-500 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 transition-all hover:bg-slate-100">
-                                    Paid
-                                </div>
-                            </label>
+                        <!-- Total Bill Display -->
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-200 pb-5">
+                            <span class="text-xl font-bold text-slate-700">Total Bill Amount:</span>
+                            <span class="text-4xl font-extrabold text-purple-700" id="total-bill-display">Rs. 1,000</span>
+                        </div>
 
-                            <label class="cursor-pointer">
-                                <input type="radio" name="payment_status" value="Pending" class="peer sr-only">
-                                <div
-                                    class="w-full py-4 text-center text-xl font-bold rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-500 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-700 transition-all hover:bg-slate-100">
-                                    Pending
-                                </div>
-                            </label>
-
-                            <label class="cursor-pointer">
-                                <input type="radio" name="payment_status" value="Not Paid" class="peer sr-only">
-                                <div
-                                    class="w-full py-4 text-center text-xl font-bold rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-500 peer-checked:border-rose-500 peer-checked:bg-rose-50 peer-checked:text-rose-700 transition-all hover:bg-slate-100">
-                                    Not Paid
-                                </div>
-                            </label>
-
+                        <!-- Cash Paid Now Input -->
+                        <div>
+                            <label class="block text-lg font-semibold text-slate-700 mb-3">Cash Paid Now (Rs.)</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-slate-400">Rs.</span>
+                                <input type="number" name="cash_paid" min="0" value="0" required
+                                    onfocus="if(this.value=='0') this.value='';"
+                                    onblur="if(this.value=='') this.value='0';" onwheel="this.blur();"
+                                    class="w-full pl-14 pr-5 py-4 text-2xl font-bold text-slate-800 bg-white border border-emerald-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition-all placeholder:text-emerald-300">
+                            </div>
+                            <p class="text-sm text-slate-500 mt-3 font-medium flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                                සම්පූර්ණයෙන්ම ණයට සෙල්ලම් කරන්නේ නම් 0 ලෙස තබන්න.
+                            </p>
                         </div>
                     </div>
 
@@ -218,12 +222,79 @@
                 </form>
             </div>
             <!-- Right: Today's Transactions Table (2/3 Width) -->
-            <div class="col-span-2 bg-white p-8 rounded-2xl border border-purple-100 shadow-sm min-h-[500px]">
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Today's Transactions</h2>
-                <div class="flex flex-col gap-4 text-center text-slate-400 font-medium">
-                    <p></p>
-                </div>
-            </div>
+<div class="col-span-2 bg-white p-10 rounded-3xl border border-purple-100 shadow-sm min-h-[500px] flex flex-col">
+    <h2 class="text-3xl font-bold text-slate-800 mb-8 bg-green-100 px-6 py-4 rounded-2xl">Today's Transactions</h2>
+
+    <!-- Table Container with Scrollbar -->
+    <div class="flex-1 overflow-y-auto pr-2" style="max-height: 480px;">
+        <table class="w-full text-left border-collapse">
+            <!-- Table Header -->
+            <thead class="sticky top-0 bg-white z-10">
+                <tr class="border-b-2 border-slate-100 text-slate-500 text-lg">
+                    <th class="py-4 font-semibold w-24">Time</th>
+                    <th class="py-4 font-semibold w-40">Player Name</th>
+                    <th class="py-4 font-semibold">Boxes</th>
+                    <th class="py-4 font-semibold text-right ">Amount</th>
+                    <th class="py-4 font-semibold text-center ">Status</th>
+                    <th class="py-4 font-semibold text-right ">Due Amount</th>
+                </tr>
+            </thead>
+
+            <!-- Table Body -->
+            <tbody class="text-lg text-slate-700">
+                @forelse($transactions as $transaction)
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <!-- Time -->
+                        <td class="py-5 text-sm text-slate-400 font-medium">
+                            {{ $transaction->created_at->format('h:i A') }}
+                        </td>
+
+                        <!-- Player Name -->
+                        <td class="py-5 font-bold text-slate-800">
+                            {{ $transaction->player->name }}
+                        </td>
+
+                        <!-- Combined Boxes -->
+                        <td class="py-5 font-semibold text-purple-700">
+                            {{ $transaction->combined_boxes }}
+                        </td>
+
+                        <!-- Total Amount -->
+                        <td class="py-5 font-bold text-right text-slate-800">
+                            Rs. {{ number_format($transaction->total_amount, 2) }}
+                        </td>
+
+                        <!-- Status Badges -->
+                        <td class="py-5 text-center">
+                            @if ($transaction->player->balance == 0)
+                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-200">Cleared</span>
+                            @elseif($transaction->player->balance < 0)
+                                <span class="bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-200">Pending</span>
+                            @else
+                                <span class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-200">Advance</span>
+                            @endif
+                        </td>
+
+                        <!-- Due Amount -->
+                        <td class="py-5 font-bold text-right whitespace-nowrap">
+                            @if($transaction->player->balance < 0)
+                                <span class="text-rose-600">Rs. {{ number_format(abs($transaction->player->balance), 2) }}</span>
+                            @else
+                                <span class="text-slate-300">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="py-16 text-center text-slate-400">
+                            <span class="text-lg font-medium">No transactions yet for today.</span>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
         </div>
     </div>
 
@@ -234,6 +305,7 @@
             // Global Config variables
             const MAX_SHEETS_PER_BOX = 20;
             const MAX_BOX_NUMBER = 100;
+            const UNIT_PRICE = 100; // Box එකක මිල (මේක Backend එකට සමාන විය යුතුයි)
 
             // 1. Toast Alert Auto-Hide Logic
             const toastSuccess = document.getElementById('toast-alert');
@@ -244,7 +316,7 @@
                     toastSuccess.style.opacity = '0';
                     toastSuccess.style.transition = 'opacity 0.5s ease';
                     setTimeout(() => toastSuccess.remove(), 500);
-                }, 3000); // Hides after 3 seconds
+                }, 3000);
             }
 
             if (toastError) {
@@ -252,19 +324,34 @@
                     toastError.style.opacity = '0';
                     toastError.style.transition = 'opacity 0.5s ease';
                     setTimeout(() => toastError.remove(), 500);
-                }, 5000); // Hides after 5 seconds
+                }, 5000);
+            }
+
+            // --- NEW: Calculate Total Bill Function ---
+            function calculateTotalBill() {
+                let totalQuantity = 0;
+                // Get all quantity inputs
+                const qtyInputs = document.querySelectorAll('input[name="quantity[]"]');
+
+                qtyInputs.forEach(input => {
+                    let val = parseInt(input.value) || 0;
+                    totalQuantity += val;
+                });
+
+                const totalAmount = totalQuantity * UNIT_PRICE;
+                // Update the display with commas (e.g. 5,000)
+                document.getElementById('total-bill-display').innerText = 'Rs. ' + totalAmount.toLocaleString(
+                    'en-US');
             }
 
             // 2. Input Validation Logic
             function applyValidation(inputElement, type) {
-                // Prevent typing letters and symbols
                 inputElement.addEventListener('keydown', function(e) {
                     if (['e', 'E', '+', '-', '.'].includes(e.key)) {
                         e.preventDefault();
                     }
                 });
 
-                // Enforce limits and numeric only
                 inputElement.addEventListener('input', function() {
                     this.value = this.value.replace(/\D/g, '');
 
@@ -277,7 +364,12 @@
                         } else if (type === 'qty') {
                             if (val > MAX_SHEETS_PER_BOX) this.value = MAX_SHEETS_PER_BOX;
                             if (val < 1) this.value = '';
+
+                            // Update total whenever quantity changes
+                            calculateTotalBill();
                         }
+                    } else if (type === 'qty') {
+                        calculateTotalBill(); // Update even if empty
                     }
                 });
             }
@@ -286,7 +378,10 @@
             document.querySelectorAll('input[name="box_number[]"]').forEach(el => applyValidation(el, 'box'));
             document.querySelectorAll('input[name="quantity[]"]').forEach(el => applyValidation(el, 'qty'));
 
-            // 3. Dynamic Rows Logic (Only ONE event listener now)
+            // Run calculation once on page load
+            calculateTotalBill();
+
+            // 3. Dynamic Rows Logic
             const container = document.getElementById('box-entries-container');
             const addBtn = document.getElementById('add-box-btn');
 
@@ -295,21 +390,21 @@
                 row.className = 'flex gap-4 mb-4 items-center entry-row';
 
                 row.innerHTML = `
-                    <div class="flex-1">
-                        <input type="number" name="box_number[]" required min="1" max="${MAX_BOX_NUMBER}"
-                            class="dynamic-box w-full px-5 py-4 text-2xl font-bold text-center bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder:text-slate-300"
-                            placeholder="1-${MAX_BOX_NUMBER}">
-                    </div>
-                    <div class="flex-1">
-                        <input type="number" name="quantity[]" required min="1" max="${MAX_SHEETS_PER_BOX}" value="1"
-                            class="dynamic-qty w-full px-5 py-4 text-2xl font-bold text-center bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder:text-slate-300">
-                    </div>
-                    <button type="button" class="remove-btn w-14 h-16 bg-rose-50 text-rose-500 border border-rose-200 rounded-2xl flex items-center justify-center hover:bg-rose-100 transition-colors shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                `;
+                <div class="flex-1">
+                    <input type="number" name="box_number[]" required min="1" max="${MAX_BOX_NUMBER}"
+                        class="dynamic-box w-full px-5 py-4 text-2xl font-bold text-center bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder:text-slate-300"
+                        placeholder="1-${MAX_BOX_NUMBER}">
+                </div>
+                <div class="flex-1">
+                    <input type="number" name="quantity[]" required min="1" max="${MAX_SHEETS_PER_BOX}" value="1"
+                        class="dynamic-qty w-full px-5 py-4 text-2xl font-bold text-center bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder:text-slate-300">
+                </div>
+                <button type="button" class="remove-btn w-14 h-16 bg-rose-50 text-rose-500 border border-rose-200 rounded-2xl flex items-center justify-center hover:bg-rose-100 transition-colors shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            `;
 
                 container.appendChild(row);
 
@@ -317,10 +412,15 @@
                 applyValidation(row.querySelector('.dynamic-box'), 'box');
                 applyValidation(row.querySelector('.dynamic-qty'), 'qty');
 
+                // Update total because a new row with default qty=1 was added
+                calculateTotalBill();
+
                 // Remove row functionality
                 const removeBtn = row.querySelector('.remove-btn');
                 removeBtn.addEventListener('click', function() {
                     row.remove();
+                    // Update total when a row is removed
+                    calculateTotalBill();
                 });
             });
         });

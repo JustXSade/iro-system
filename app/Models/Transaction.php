@@ -11,10 +11,14 @@ class Transaction extends Model
 
     protected $fillable = [
         'game_date',
-        'player_name',
+        'player_id',
         'box_number',
         'quantity',
-        'total_amount',
-        'payment_status'
+        'total_amount'
     ];
+
+    public function player()
+    {
+        return $this->belongsTo(Player::class);
+    }
 }

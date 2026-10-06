@@ -9,12 +9,15 @@ class Player extends Model
 {
     use HasFactory;
 
-    // Database එකට save කරන්න අවසර දෙන columns
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'balance'];
 
-    // Relationship එක: Player කෙනෙක්ට Transactions කිහිපයක් තියෙනවා
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }
