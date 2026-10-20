@@ -15,7 +15,7 @@
 
     <!-- Navigation Bar -->
     <!-- Navigation Bar -->
-    <nav class="bg-white px-6 md:px-12 lg:px-24 py-5 flex items-center justify-center relative mt-4 mx-4 rounded-xl ">
+    <nav class="bg-white px-6 md:px-12 lg:px-24 pt-5 flex items-center justify-center relative mt-4 mx-4 rounded-xl ">
         <div class="hidden md:flex items-center bg-violet-200 border border-purple-100 rounded-full px-4 py-3 gap-3">
             
             <!-- Dashboard Link -->

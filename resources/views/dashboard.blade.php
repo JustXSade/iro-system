@@ -27,12 +27,22 @@
     @endif
 
     <!-- Live Board Section -->
-    <div class="bg-white p-8 rounded-3xl border border-purple-100 shadow-sm mt-6 mb-6">
+    <div id="live-board-section"
+        class="bg-white p-8 rounded-3xl border border-purple-100 shadow-sm mt-6 mb-6 transition-all duration-300">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold text-slate-800">Live Board Status <span
-                    class="text-xl text-slate-500 font-medium">(ඉතිරි කොටු)</span></h2>
-
-            <!-- Status Indicators (Text size එක text-base කළා, රවුම් w-4 h-4 කළා) -->
+            <div class="flex items-center gap-4">
+                <h2 class="text-3xl font-bold text-slate-800">Live Board Status 
+                    <span class="text-xl text-slate-500 font-medium">(00-99)</span>
+                </h2>
+                <!-- Full Screen Toggle Button -->
+                <button type="button" id="fullscreen-btn" class="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                    Full Screen
+                </button>
+            </div>
+            <!-- Status Indicators -->
             <div class="flex gap-6 text-base font-semibold">
                 <span class="flex items-center gap-2 text-green-600">
                     <div class="w-4 h-4 rounded-full bg-green-500"></div> Available
@@ -46,14 +56,42 @@
             </div>
         </div>
 
-        <!-- 10x10 Grid (Gap එක gap-3 කළා) -->
+        <!-- 10x10 Grid (00 to 99) -->
         <div class="grid grid-cols-10 gap-3">
-            <button
-                class="bg-green-50 border border-green-200 rounded-xl py-3 px-2 flex flex-col items-center justify-center hover:bg-green-100 transition-colors cursor-pointer shadow-sm hover:shadow-md">
-                <span class="text-3xl font-bold text-green-700">1</span>
-                <span class="text-sm font-bold text-green-700 bg-green-200/50 px-3 py-1 rounded-full mt-1.5">20 left</span>
-            </button>
+            @for ($i = 0; $i <= 99; $i++)
+                @php
+                    $sold = $boxStats[$i] ?? 0;
+                    $available = 20 - $sold;
+                    // 0 අගයන් "00" ලෙසද, 1 අගය "01" ලෙසද බිංදුවක් සමඟ පෙන්වීමට:
+                    $boxLabel = str_pad($i, 2, '0', STR_PAD_LEFT);
 
+                    // Availability අනුව පාට තීරණය කිරීම
+                    $bgClass = 'bg-green-50 border-green-200 hover:bg-green-100';
+                    $textClass = 'text-green-700';
+                    $badgeClass = 'bg-green-200/50 text-green-700';
+                    $cursorClass = 'cursor-pointer';
+
+                    if ($available == 0) {
+                        $bgClass = 'bg-slate-50 border-slate-200 opacity-70';
+                        $textClass = 'text-slate-400';
+                        $badgeClass = 'bg-slate-200/50 text-slate-500';
+                        $cursorClass = 'cursor-not-allowed';
+                    } elseif ($available <= 5) {
+                        // ඉතිරිව ඇත්තේ 5ක් හෝ ඊට අඩුවෙන් නම් (Ending Soon)
+                        $bgClass = 'bg-amber-50 border-amber-200 hover:bg-amber-100';
+                        $textClass = 'text-amber-600';
+                        $badgeClass = 'bg-amber-200/50 text-amber-700';
+                    }
+                @endphp
+
+                <button {{ $available == 0 ? 'disabled' : '' }}
+                    class="{{ $bgClass }} border rounded-xl py-3 px-2 flex flex-col items-center justify-center transition-colors shadow-sm {{ $cursorClass }}">
+                    <span class="text-3xl font-bold {{ $textClass }}">{{ $boxLabel }}</span>
+                    <span class="text-sm font-bold {{ $badgeClass }} px-3 py-1 rounded-full mt-1.5">
+                        {{ $available == 0 ? 'Sold Out' : $available . ' left' }}
+                    </span>
+                </button>
+            @endfor
         </div>
     </div>
 
@@ -141,12 +179,18 @@
                 <form action="{{ url('/store-entry') }}" method="POST" id="quickEntryForm">
                     @csrf
 
-                    <!-- Player Name Input -->
-                    <div class="mb-6">
+                    <!-- Player Name Input with Autocomplete -->
+                    <div class="mb-6 relative">
                         <label class="block text-lg font-semibold text-slate-700 mb-2">Player Name</label>
-                        <input type="text" name="player_name" required autocomplete="off"
+                        <input type="text" name="player_name" id="player_name" required autocomplete="off"
                             class="w-full px-5 py-4 text-xl bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder:text-slate-400"
                             placeholder="Enter player name">
+
+                        <!-- Suggestions Dropdown Box -->
+                        <ul id="player-suggestions"
+                            class="absolute z-10 w-full bg-white border border-purple-100 rounded-xl shadow-lg mt-2 hidden max-h-60 overflow-y-auto">
+                            <!-- JavaScript වලින් මෙතනට නම් ටික එනවා -->
+                        </ul>
                     </div>
 
                     <!-- Dynamic Box Entries Container -->
@@ -222,79 +266,85 @@
                 </form>
             </div>
             <!-- Right: Today's Transactions Table (2/3 Width) -->
-<div class="col-span-2 bg-white p-10 rounded-3xl border border-purple-100 shadow-sm min-h-[500px] flex flex-col">
-    <h2 class="text-3xl font-bold text-slate-800 mb-8 bg-green-100 px-6 py-4 rounded-2xl">Today's Transactions</h2>
+            <div
+                class="col-span-2 bg-white p-10 rounded-3xl border border-purple-100 shadow-sm min-h-[500px] flex flex-col">
+                <h2 class="text-3xl font-bold text-slate-800 mb-8 bg-green-100 px-6 py-4 rounded-2xl">Today's Transactions
+                </h2>
 
-    <!-- Table Container with Scrollbar -->
-    <div class="flex-1 overflow-y-auto pr-2" style="max-height: 480px;">
-        <table class="w-full text-left border-collapse">
-            <!-- Table Header -->
-            <thead class="sticky top-0 bg-white z-10">
-                <tr class="border-b-2 border-slate-100 text-slate-500 text-lg">
-                    <th class="py-4 font-semibold w-24">Time</th>
-                    <th class="py-4 font-semibold w-40">Player Name</th>
-                    <th class="py-4 font-semibold">Boxes</th>
-                    <th class="py-4 font-semibold text-right ">Amount</th>
-                    <th class="py-4 font-semibold text-center ">Status</th>
-                    <th class="py-4 font-semibold text-right ">Due Amount</th>
-                </tr>
-            </thead>
+                <!-- Table Container with Scrollbar -->
+                <div class="flex-1 overflow-y-auto pr-2" style="max-height: 480px;">
+                    <table class="w-full text-left border-collapse">
+                        <!-- Table Header -->
+                        <thead class="sticky top-0 bg-white z-10">
+                            <tr class="border-b-2 border-slate-100 text-slate-500 text-lg">
+                                <th class="py-4 font-semibold w-24">Time</th>
+                                <th class="py-4 font-semibold w-40">Player Name</th>
+                                <th class="py-4 font-semibold">Boxes</th>
+                                <th class="py-4 font-semibold text-right ">Amount</th>
+                                <th class="py-4 font-semibold text-center ">Status</th>
+                                <th class="py-4 font-semibold text-right ">Due Amount</th>
+                            </tr>
+                        </thead>
 
-            <!-- Table Body -->
-            <tbody class="text-lg text-slate-700">
-                @forelse($transactions as $transaction)
-                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                        <!-- Time -->
-                        <td class="py-5 text-sm text-slate-400 font-medium">
-                            {{ $transaction->created_at->format('h:i A') }}
-                        </td>
+                        <!-- Table Body -->
+                        <tbody class="text-lg text-slate-700">
+                            @forelse($transactions as $transaction)
+                                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                                    <!-- Time -->
+                                    <td class="py-5 text-sm text-slate-400 font-medium">
+                                        {{ $transaction->created_at->format('h:i A') }}
+                                    </td>
 
-                        <!-- Player Name -->
-                        <td class="py-5 font-bold text-slate-800">
-                            {{ $transaction->player->name }}
-                        </td>
+                                    <!-- Player Name -->
+                                    <td class="py-5 font-bold text-slate-800">
+                                        {{ $transaction->player->name }}
+                                    </td>
 
-                        <!-- Combined Boxes -->
-                        <td class="py-5 font-semibold text-purple-700">
-                            {{ $transaction->combined_boxes }}
-                        </td>
+                                    <!-- Combined Boxes -->
+                                    <td class="py-5 font-semibold text-purple-700">
+                                        {{ $transaction->combined_boxes }}
+                                    </td>
 
-                        <!-- Total Amount -->
-                        <td class="py-5 font-bold text-right text-slate-800">
-                            Rs. {{ number_format($transaction->total_amount, 2) }}
-                        </td>
+                                    <!-- Total Amount -->
+                                    <td class="py-5 font-bold text-right text-slate-800">
+                                        Rs. {{ number_format($transaction->total_amount, 2) }}
+                                    </td>
 
-                        <!-- Status Badges -->
-                        <td class="py-5 text-center">
-                            @if ($transaction->player->balance == 0)
-                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-200">Cleared</span>
-                            @elseif($transaction->player->balance < 0)
-                                <span class="bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-200">Pending</span>
-                            @else
-                                <span class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-200">Advance</span>
-                            @endif
-                        </td>
+                                    <!-- Status Badges -->
+                                    <td class="py-5 text-center">
+                                        @if ($transaction->player->balance == 0)
+                                            <span
+                                                class="bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-200">Cleared</span>
+                                        @elseif($transaction->player->balance < 0)
+                                            <span
+                                                class="bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-200">Pending</span>
+                                        @else
+                                            <span
+                                                class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-200">Advance</span>
+                                        @endif
+                                    </td>
 
-                        <!-- Due Amount -->
-                        <td class="py-5 font-bold text-right whitespace-nowrap">
-                            @if($transaction->player->balance < 0)
-                                <span class="text-rose-600">Rs. {{ number_format(abs($transaction->player->balance), 2) }}</span>
-                            @else
-                                <span class="text-slate-300">-</span>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="py-16 text-center text-slate-400">
-                            <span class="text-lg font-medium">No transactions yet for today.</span>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+                                    <!-- Due Amount -->
+                                    <td class="py-5 font-bold text-right whitespace-nowrap">
+                                        @if ($transaction->player->balance < 0)
+                                            <span class="text-rose-600">Rs.
+                                                {{ number_format(abs($transaction->player->balance), 2) }}</span>
+                                        @else
+                                            <span class="text-slate-300">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="py-16 text-center text-slate-400">
+                                        <span class="text-lg font-medium">No transactions yet for today.</span>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -423,6 +473,112 @@
                     calculateTotalBill();
                 });
             });
+
+            // --- Player Name Autocomplete Logic ---
+            const playerNameInput = document.getElementById('player_name');
+            const suggestionsBox = document.getElementById('player-suggestions');
+
+            playerNameInput.addEventListener('input', function() {
+                const query = this.value.trim();
+
+                if (query.length < 1) {
+                    suggestionsBox.classList.add('hidden');
+                    suggestionsBox.innerHTML = '';
+                    return;
+                }
+
+                // Fetch matched players from backend
+                fetch(`/players/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(players => {
+                        suggestionsBox.innerHTML = '';
+
+                        if (players.length > 0) {
+                            suggestionsBox.classList.remove('hidden');
+
+                            players.forEach(player => {
+                                const li = document.createElement('li');
+                                li.className =
+                                    'px-5 py-3 hover:bg-purple-50 cursor-pointer border-b border-slate-50 last:border-0 flex justify-between items-center transition-colors';
+
+                                // Check if player has debt or advance
+                                let balanceHtml = '';
+                                if (player.balance < 0) {
+                                    balanceHtml =
+                                        `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-lg text-xs font-bold border border-rose-200">Naya: Rs. ${Math.abs(player.balance).toLocaleString()}</span>`;
+                                } else if (player.balance > 0) {
+                                    balanceHtml =
+                                        `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg text-xs font-bold border border-emerald-200">Adv: Rs. ${player.balance.toLocaleString()}</span>`;
+                                }
+
+                                li.innerHTML =
+                                    `<span class="text-lg font-bold text-slate-700">${player.name}</span> ${balanceHtml}`;
+
+                                // Click to select player
+                                li.addEventListener('click', () => {
+                                    playerNameInput.value = player.name;
+                                    suggestionsBox.classList.add('hidden');
+                                });
+
+                                suggestionsBox.appendChild(li);
+                            });
+                        } else {
+                            suggestionsBox.classList.add('hidden');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching players:', error));
+            });
+
+            // Hide dropdown if clicked outside
+            document.addEventListener('click', function(e) {
+                if (!playerNameInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    suggestionsBox.classList.add('hidden');
+                }
+            });
+
         });
+
+        // --- Full Screen Live Board Logic ---
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const liveBoardSection = document.getElementById('live-board-section');
+
+    fullscreenBtn.addEventListener('click', function() {
+        // Tailwind classes toggle කිරීම මගින් Full screen කිරීම
+        liveBoardSection.classList.toggle('fixed');
+        liveBoardSection.classList.toggle('inset-0');
+        liveBoardSection.classList.toggle('z-[100]');
+        liveBoardSection.classList.toggle('w-full');
+        liveBoardSection.classList.toggle('h-screen');
+        liveBoardSection.classList.toggle('overflow-y-auto');
+        liveBoardSection.classList.toggle('rounded-none');
+        
+        // Full screen අවස්ථාවේදී margin සහ border අයින් කිරීම
+        liveBoardSection.classList.toggle('mt-6');
+        liveBoardSection.classList.toggle('mb-6');
+        liveBoardSection.classList.toggle('border');
+        
+        // Button එකේ Text එක වෙනස් කිරීම
+        if (liveBoardSection.classList.contains('fixed')) {
+            fullscreenBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                </svg>
+                Exit Full Screen
+            `;
+            fullscreenBtn.classList.replace('bg-purple-100', 'bg-rose-100');
+            fullscreenBtn.classList.replace('text-purple-700', 'text-rose-700');
+        } else {
+            fullscreenBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                </svg>
+                Full Screen
+            `;
+            fullscreenBtn.classList.replace('bg-rose-100', 'bg-purple-100');
+            fullscreenBtn.classList.replace('text-rose-700', 'text-purple-700');
+        }
+    });
+
+
     </script>
 @endsection
